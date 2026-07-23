@@ -287,6 +287,10 @@
     yearlyData
       .filter((row) => row.시도 === "서울특별시" && ["종로구", "중랑구", "동작구"].includes(row.구군) && Number(row.연강수량_mm) === 0)
       .forEach((row) => { row.연강수량_mm = seoulRainfallFallback[String(row.연도)] || row.연강수량_mm; });
+    riskData.forEach((item) => {
+      const sinkholeRow = yearlyData.find((row) => row.시도 === item.시도 && row.구군 === item.구군);
+      item.구별싱크홀건수 = Number(sinkholeRow?.구별싱크홀건수 ?? item.지반침하_시도연평균발생건수 ?? 0);
+    });
     const baseViewBox = { x: 0, y: 0, width: 760, height: 620 };
     const dataStartViewBox = { x: 76, y: 62, width: 608, height: 496 };
     const mapZoom = {
@@ -307,7 +311,7 @@
       traffic: { label: "교통량", key: "교통량_3개년평균", unit: "대" },
       facility: { label: "노후시설물", key: "노후시설물수", unit: "개" },
       soil: { label: "지질토양", key: "지질토양위험점수_6점", unit: "/6" },
-      sinkhole: { label: "지반침하", key: "지반침하_시도연평균발생건수", unit: "건" },
+      sinkhole: { label: "지반침하", key: "구별싱크홀건수", unit: "건" },
     };
     const riskWeights = {
       traffic: { label: "교통량", pct: 30.9 },
@@ -379,7 +383,7 @@
         return `<div class="metric-card"><span>지질토양 위험점수</span><strong>${fmt(item.지질토양위험점수_6점, " / 6")}</strong></div>`;
       }
       if(activeMetric === "sinkhole"){
-        return `<div class="metric-card"><span>구별 지반침하 발생건수</span><strong>${fmt(item.지반침하_시도연평균발생건수, "건")}</strong></div>`;
+        return `<div class="metric-card"><span>구별 지반침하 발생건수</span><strong>${fmt(item.구별싱크홀건수, "건")}</strong></div>`;
       }
       const config = activeMetric === "rain"
         ? { label: "강수량", key: "연강수량_mm", avgKey: "강수량_3개년평균_mm", unit: "mm" }
